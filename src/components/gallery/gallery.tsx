@@ -1,4 +1,4 @@
-import { Component, State, Event, EventEmitter, Method, Prop } from '@stencil/core';
+import { Component, State, Event, EventEmitter, Method, Prop, Listen } from '@stencil/core';
 import { image } from './interfaces/interfaces';
 import pinchit from 'pinchit/dist/pinchit.js';
 
@@ -20,15 +20,17 @@ export class Gallery {
 
   public galleryImageContainer: HTMLElement;
   public galleryImageElement: HTMLElement;
+  public gridOverlayElement: HTMLElement;
   public gestureZone = this.galleryImageElement;
+  public imagePreviewHideNav: any = { 'grid-template-columns': '100%' };
+  public hideNavStyle: any = { 'display': 'none' };
 
-  public imagePreviewHideNav: any = {
-    'grid-template-columns': '100%'
-  };
-
-  public hideNavStyle: any = {
-    'display': 'none'
-  };
+  @Listen('keydown')
+  handleKeyDown(ev) {
+    if (ev.key == 'Escape' && this.displayGrid) {
+      this.displayGrid = false;
+    }
+  }
 
   @Prop() public images: Array<image> = [];
   @Prop() public closeButton: boolean = false;
@@ -36,20 +38,13 @@ export class Gallery {
   @Event() onGalleryClose: EventEmitter;
   @Event() onImageChange: EventEmitter<number>;
 
-
   @State() public galleryImage: image;
   @State() public imageIndex: number;
   @State() public isImageLoading: boolean;
   @State() public displayGrid: boolean;
-
-  @State() public imageWrapperStyle: any = {
-    display: 'none'
-  };
-
+  @State() public imageWrapperStyle: any = { display: 'none' };
   @State() public galleryImageStyle: any = {};
-
   @State() public galleryWrapper: any = {};
-
   @State() public touches: number;
 
   componentWillLoad() {
@@ -191,7 +186,7 @@ export class Gallery {
 
   private _renderToolbarGrid(): any {
     if (this.displayGrid) {
-      return <div class='bc-gallery-grid-overlay'>
+      return <div class='bc-gallery-grid-overlay' ref={element => this.gridOverlayElement = element}>
         <div class="text-right">
           <button class='bc-close-button' onClick={() => this.displayGrid = false}></button>
         </div>
