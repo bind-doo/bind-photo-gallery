@@ -263,12 +263,6 @@ export class Gallery {
                   src={this.galleryImage && this.galleryImage.url ? this.galleryImage.url : null}
                   onLoad={() => this.imageLoaded()}
                   alt="image" />
-
-                <p class='text-center bc-image-title'>
-                  {this.galleryImage && this.galleryImage.title ? <span>{this.galleryImage.title}</span> : null}
-                  {this.galleryImage && this.galleryImage.description && this.galleryImage.title ? ' - ' : ''}
-                  {this.galleryImage && this.galleryImage.description ? <span> {this.galleryImage.description}</span> : null}
-                </p>
               </div>
             </div>
 
@@ -277,6 +271,13 @@ export class Gallery {
             </div>
           </div>
 
+          <div>
+            <p class='text-center bc-image-title'>
+              {this.galleryImage && this.galleryImage.title ? <span>{this.galleryImage.title}</span> : null}
+              {this.galleryImage && this.galleryImage.description && this.galleryImage.title ? ' - ' : ''}
+              {this.galleryImage && this.galleryImage.description ? <span> {this.galleryImage.description}</span> : null}
+            </p>
+          </div>
         </div>
       </div>
     );
