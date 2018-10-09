@@ -191,7 +191,10 @@ export class Gallery {
 
   private _renderToolbarGrid(): any {
     if (this.displayGrid) {
-      return <div class='bc-gallery-grid-overlay' onClick={() => this.displayGrid = false}>
+      return <div class='bc-gallery-grid-overlay'>
+        <div class="text-right">
+          <button class='bc-close-button' onClick={() => this.displayGrid = false}></button>
+        </div>
         <div class='bc-gallery-grid'>
           {
             this.images.map((image, index) => {
@@ -207,9 +210,8 @@ export class Gallery {
 
   private _renderCloseButton(): any {
     if (this.closeButton) {
-      return <div class='text-right bc-top-right'>
-        <button class='bc-close-button' onClick={() => this._closeGallery()}></button>
-      </div>
+      return <button class='bc-close-button' onClick={() => this._closeGallery()}></button>
+
     } else {
       return <div></div>
     }
@@ -246,6 +248,8 @@ export class Gallery {
             <div class='bc-top-left'>
               {this._renderGridButton()}
               {this._renderImagesNumber()}
+            </div>
+            <div class="bc-top-right text-right">
               {this._renderCloseButton()}
             </div>
           </div>
@@ -255,7 +259,7 @@ export class Gallery {
               <button class='bc-navigation-left-button'></button>
             </div>
 
-            <div>
+            <div class='bc-image-wrapper'>
               {this._displayLoadingSpinner()}
               <div class='bc-image-wrapper' style={this.imageWrapperStyle}
                 ref={element => this.galleryImageContainer = element}>
