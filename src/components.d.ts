@@ -35,6 +35,7 @@ declare global {
     interface BindGallery {
       'closeButton': boolean;
       'imageLoaded': () => void;
+      'imageStartIndex': number;
       'images': Array<image>;
       'nextImage': () => void;
       'openGridGallery': () => void;
@@ -63,6 +64,7 @@ declare global {
   namespace JSXElements {
     export interface BindGalleryAttributes extends HTMLAttributes {
       'closeButton'?: boolean;
+      'imageStartIndex'?: number;
       'images'?: Array<image>;
       'onOnGalleryClose'?: (event: CustomEvent) => void;
       'onOnImageChange'?: (event: CustomEvent<number>) => void;

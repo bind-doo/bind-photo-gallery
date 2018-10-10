@@ -33,6 +33,7 @@ export class Gallery {
   }
 
   @Prop() public images: Array<image> = [];
+  @Prop() public imageStartIndex: number = 0;
   @Prop() public closeButton: boolean = false;
 
   @Event() onGalleryClose: EventEmitter;
@@ -51,7 +52,7 @@ export class Gallery {
   }
 
   componentDidLoad() {
-    this.setImage(0);
+    this.setImage(this.imageStartIndex);
 
     this.galleryImageContainer.addEventListener('touchstart', (event) => {
       this.touchstartX = event['changedTouches'][0].screenX;
