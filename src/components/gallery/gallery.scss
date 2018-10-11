@@ -107,10 +107,19 @@
 
 .bc-rotate-button {
   @extend %base-button;
-  background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IiB2aWV3Qm94PSIwIDAgNTEyIDUxMiIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgNTEyIDUxMjsiIHhtbDpzcGFjZT0icHJlc2VydmUiPjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+LnN0MHtmaWxsOiNGN0ZCRkY7fTwvc3R5bGU+PHBhdGggY2xhc3M9InN0MCIgZD0iTTI1NiwzODhjLTcyLjYsMC0xMzItNTkuNC0xMzItMTMyYzAtNzIuNiw1OS40LTEzMiwxMzItMTMyYzM2LjMsMCw2OS4zLDE1LjQsOTIuNCwzOS42TDI3OCwyMzRoMTU0VjgwbC01MS43LDUxLjdDMzQ4LjQsOTkuOCwzMDQuNCw4MCwyNTYsODBjLTk2LjgsMC0xNzYsNzkuMi0xNzYsMTc2czc4LjEsMTc2LDE3NiwxNzZjODEsMCwxNDguMy01NC4xLDE2OS40LTEyOGgtNDYuNkMzNjAuMSwzNTMuNiwzMTEuNywzODgsMjU2LDM4OHoiLz48L3N2Zz4=);
+  margin-top: 10px;
+  margin-right: 8px;
+	background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1OC41NCA0NS44NiI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiNmOWZkZmU7fTwvc3R5bGU+PC9kZWZzPjx0aXRsZT5yb3RhdGU8L3RpdGxlPjxnIGlkPSJMYXllcl8yIiBkYXRhLW5hbWU9IkxheWVyIDIiPjxnIGlkPSJMYXllcl8xLTIiIGRhdGEtbmFtZT0iTGF5ZXIgMSI+PHBhdGggY2xhc3M9ImNscy0xIiBkPSJNNDkuMTcsNy41NWgtMTFhMy4xMywzLjEzLDAsMSwwLDAsNi4yNWgxMWEzLjEzLDMuMTMsMCwwLDEsMy4xMiwzLjEzVjM2LjQ4YTMuMTMsMy4xMywwLDAsMS0zLjEyLDMuMTNIOS4zN2EzLjEzLDMuMTMsMCwwLDEtMy4xMi0zLjEzVjE2LjkzQTMuMTMsMy4xMywwLDAsMSw5LjM3LDEzLjhoNi4yN3YuMzRsLTIsMS42OGEzLjEzLDMuMTMsMCwwLDAsMiw1LjUzLDMuMDksMy4wOSwwLDAsMCwyLS43NGw4LjY3LTcuMjlhMy4xNCwzLjE0LDAsMCwwLC4wNy00LjczTDE3LjczLjhhMy4xMywzLjEzLDAsMCwwLTQuMTcsNC42NmwyLjA4LDEuODd2LjIySDkuMzdBOS4zOCw5LjM4LDAsMCwwLDAsMTYuOTNWMzYuNDhhOS4zOCw5LjM4LDAsMCwwLDkuMzcsOS4zOGgzOS44YTkuMzgsOS4zOCwwLDAsMCw5LjM3LTkuMzhWMTYuOTNhOS4zOCw5LjM4LDAsMCwwLTkuMzctOS4zOFoiLz48L2c+PC9nPjwvc3ZnPg==);
   background-repeat: no-repeat;
-  width: 36px;
-  height: 36px;
+  width: 24px;
+  height: 19px;
+}
+
+.bc-rotate-text {
+  display: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: white;
 }
 
 .bc-image-preview {
@@ -127,7 +136,7 @@
   color: white;
 }
 
-.bc-image-wrapper {
+.bc-image-wrapper, .bc-image-container {
   width: 100%;
   max-height: 100%;
   overflow: hidden;
@@ -207,6 +216,12 @@
   background-repeat: no-repeat;
   width: 50px;
   height: 50px;
+}
+
+@media (min-width: 692px) {
+  .bc-rotate-text {
+    display: initial;
+  }
 }
 
 @media(max-width: 830px) and (orientation: landscape) {

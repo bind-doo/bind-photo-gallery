@@ -40,6 +40,7 @@ declare global {
       'nextImage': () => void;
       'openGridGallery': () => void;
       'previousImage': () => void;
+      'rotateButton': boolean;
       'setImage': (imageIndex: number) => void;
     }
   }
@@ -68,6 +69,7 @@ declare global {
       'images'?: Array<image>;
       'onOnGalleryClose'?: (event: CustomEvent) => void;
       'onOnImageChange'?: (event: CustomEvent<number>) => void;
+      'rotateButton'?: boolean;
     }
   }
 }

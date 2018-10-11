@@ -36,6 +36,7 @@ export class Gallery {
   @Prop() public images: Array<image> = [];
   @Prop() public imageStartIndex: number = 0;
   @Prop() public closeButton: boolean = false;
+  @Prop() public rotateButton: boolean = true;
 
   @Event() onGalleryClose: EventEmitter;
   @Event() onImageChange: EventEmitter<number>;
@@ -84,9 +85,13 @@ export class Gallery {
 
   @Method()
   public setImage(imageIndex: number): void {
-    if (imageIndex === this.imageIndex) return;
-    if (this.displayGrid) this.displayGrid = false;
+    if (imageIndex === this.imageIndex && !this.displayGrid) return;
+    if (imageIndex === this.imageIndex && this.displayGrid) {
+      this.displayGrid = false;
+      return;
+    }
 
+    if (this.displayGrid) this.displayGrid = false;
     this.imageIndex = imageIndex;
     this.galleryImage = this.images[imageIndex];
     this.isImageLoading = true;
@@ -256,6 +261,17 @@ export class Gallery {
     }
   }
 
+  private _renderRotateButton(): any {
+    if (this.rotateButton) {
+      return <div onClick={() => this._rotateImage(this.galleryImage)}>
+        <button class='bc-rotate-button'></button>
+        <small class="bc-rotate-text">Rotate image</small>
+      </div>
+    } else {
+      return <div></div>
+    }
+  }
+
   private _renderImagesNumber(): any {
     if (this.images.length >= 2) {
       return <div>
@@ -279,7 +295,7 @@ export class Gallery {
               {this._renderImagesNumber()}
             </div>
             <div class="bc-top-middle text-center">
-              <button class='bc-rotate-button' onClick={() => this._rotateImage(this.galleryImage)}></button>
+              {this._renderRotateButton()}
             </div>
             <div class="bc-top-right text-right">
               {this._renderCloseButton()}
@@ -293,7 +309,7 @@ export class Gallery {
 
             <div class='bc-image-wrapper'>
               {this._displayLoadingSpinner()}
-              <div class='bc-image-wrapper' style={this.imageWrapperStyle}
+              <div class='bc-image-container' style={this.imageWrapperStyle}
                 ref={element => this.galleryImageContainer = element}>
                 <img id='bc-gallery-image' class='bc-gallery-image' style={this.galleryImageStyle}
                   ref={element => this.galleryImageElement = element}
