@@ -23,12 +23,14 @@
   background-color: rgba(16, 21, 33, 1);
   color: white;
   z-index: 50000000;
-  overflow-y: scroll;
+  overflow-y: hidden;
 }
 
 .bc-gallery-grid {
   height: 100%;
+  overflow-y: auto;
   margin-top: 20px;
+  padding-bottom: 30px
 }
 
 .bc-grid-image-container {
@@ -48,8 +50,8 @@
 }
 
 .bc-grid-image {
-  max-width: 260px;
-  max-height: 130px;
+  max-width: 240px;
+  max-height: 140px;
   width: auto;
   height: auto;
 }
@@ -78,7 +80,7 @@
 
 .bc-top-toolbar {
   display: grid;
-  grid-template-columns: 50% 50%;
+  grid-template-columns: 40% 20% 40%;
   z-index: 555555;
 }
 

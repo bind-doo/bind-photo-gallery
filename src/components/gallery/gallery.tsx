@@ -24,6 +24,7 @@ export class Gallery {
   public gestureZone = this.galleryImageElement;
   public imagePreviewHideNav: any = { 'grid-template-columns': '100%' };
   public hideNavStyle: any = { 'display': 'none' };
+  public rotatedImagesData: Array<any> = JSON.parse(sessionStorage.getItem('rotatedImages') || "[]") || [];
 
   @Listen('keydown')
   handleKeyDown(ev) {
@@ -53,6 +54,13 @@ export class Gallery {
 
   componentDidLoad() {
     this.setImage(this.imageStartIndex);
+
+    if (this.rotatedImagesData.length >= 1) {
+      this.images.forEach((image, index) => {
+        const exists = this.rotatedImagesData.filter(item => item.index == index);
+        if (exists.length) { image['rotateAngle'] = exists[0].angle }
+      });
+    }
 
     this.galleryImageContainer.addEventListener('touchstart', (event) => {
       this.touchstartX = event['changedTouches'][0].screenX;
@@ -112,6 +120,7 @@ export class Gallery {
 
   @Method()
   public imageLoaded(): void {
+    this.galleryImageElement.style.transform = `rotate(${this.galleryImage['rotateAngle'] || 0}deg)`;;
     this.isImageLoading = false;
     this.imageWrapperStyle = { display: 'initial' };
   }
@@ -185,6 +194,31 @@ export class Gallery {
     this.galleryImageStyle = {};
   }
 
+  private _rotateImage(image): void {
+    // setup rotate angle
+    if (!this.galleryImage['rotateAngle']) this.galleryImage['rotateAngle'] = 0;
+    (this.galleryImage['rotateAngle'] == 270) ? this.galleryImage['rotateAngle'] = 0 : this.galleryImage['rotateAngle'] += 90;
+
+    // get current image index and rotateAngle in an object
+    let imageData = { angle: this.galleryImage['rotateAngle'], index: this.images.indexOf(image) }
+
+    // check if image with that index is already rotated and store the vlaue
+    const exists = this.rotatedImagesData.filter(item => item.index == imageData.index);
+
+    // if image already is rotated, will change that value, if not will push image to array and add to session storage
+    if (this.rotatedImagesData.length && exists.length) {
+      imageData.angle > 0 ? this.rotatedImagesData[this.rotatedImagesData.indexOf(exists[0])] = imageData : this.rotatedImagesData.splice(this.rotatedImagesData.indexOf(exists[0]), 1);
+    } else {
+      this.rotatedImagesData.push(imageData);
+    }
+
+    // apply transformation to image element
+    this.galleryImageElement.style.transform = `rotate(${this.galleryImage['rotateAngle']}deg)`;
+
+    // set data
+    sessionStorage.setItem('rotatedImages', JSON.stringify(this.rotatedImagesData));
+  }
+
   private _renderToolbarGrid(): any {
     if (this.displayGrid) {
       return <div class='bc-gallery-grid-overlay' ref={element => this.gridOverlayElement = element}>
@@ -193,9 +227,9 @@ export class Gallery {
         </div>
         <div class='bc-gallery-grid'>
           {this.images.map((image, index) => {
-              return <div class='bc-grid-image-container' onClick={() => this.setImage(index)}><img
-                class='bc-grid-image' src={image.url} alt="" /></div>
-            })}
+            return <div class='bc-grid-image-container' onClick={() => this.setImage(index)}><img
+              class='bc-grid-image' src={image.url} alt="" /></div>
+          })}
         </div>
         <div class="clearfix"></div>
       </div>
@@ -243,6 +277,9 @@ export class Gallery {
             <div class='bc-top-left'>
               {this._renderGridButton()}
               {this._renderImagesNumber()}
+            </div>
+            <div class="bc-top-middle text-center">
+              <button class='bc-rotate-button' onClick={() => this._rotateImage(this.galleryImage)}></button>
             </div>
             <div class="bc-top-right text-right">
               {this._renderCloseButton()}
