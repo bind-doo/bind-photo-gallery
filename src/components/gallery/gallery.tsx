@@ -26,11 +26,24 @@ export class Gallery {
   public hideNavStyle: any = { 'display': 'none' };
   public rotatedImagesData: Array<any> = JSON.parse(sessionStorage.getItem('rotatedImages') || "[]") || [];
 
-  @Listen('keydown')
-  handleKeyDown(ev) {
-    if (ev.key == 'Escape' && this.displayGrid) {
+  @Listen('window:keydown.escape')
+  handleEsc() {
+    if (this.displayGrid) {
       this.displayGrid = false;
+      return;
     }
+
+    this._closeGallery();
+  }
+
+  @Listen('window:keydown.right')
+  handleRight() {
+    if (!this.displayGrid) this.nextImage();
+  }
+
+  @Listen('window:keydown.left')
+  handleLeft() {
+    if (!this.displayGrid) this.previousImage();
   }
 
   @Prop() public images: Array<image> = [];
