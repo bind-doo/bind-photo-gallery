@@ -192,13 +192,12 @@ export class Gallery {
           <button class='bc-close-button' onClick={() => this.displayGrid = false}></button>
         </div>
         <div class='bc-gallery-grid'>
-          {
-            this.images.map((image, index) => {
+          {this.images.map((image, index) => {
               return <div class='bc-grid-image-container' onClick={() => this.setImage(index)}><img
                 class='bc-grid-image' src={image.url} alt="" /></div>
-            })
-          }
+            })}
         </div>
+        <div class="clearfix"></div>
       </div>
     }
     ;
