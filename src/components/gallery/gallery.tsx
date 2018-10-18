@@ -83,14 +83,15 @@ export class Gallery {
     });
 
     this.galleryImageContainer.addEventListener('touchend', (event) => {
-      let elem = document.getElementById('bc-gallery-image');
       this.touchendX = event['changedTouches'][0].screenX;
       this.touchendY = event['changedTouches'][0].screenY;
 
-      if ((!this.displayGrid && this.touches === 1) && !(elem['style'].transform.includes('-'))) {
+      if ((!this.displayGrid && this.touches === 1) && !(this.galleryImageElement.style.transform.includes('-'))) {
         this._handleGesture();
         this.touches = 0;
       }
+
+      this.galleryImageElement.style.removeProperty('transform-origin');
     });
 
     pinchit(this.galleryImageContainer);
@@ -141,6 +142,7 @@ export class Gallery {
     this.galleryImageElement.style.transform = `rotate(${this.galleryImage['rotateAngle'] || 0}deg)`;;
     this.isImageLoading = false;
     this.imageWrapperStyle = { display: 'initial' };
+    this.galleryImageElement.removeAttribute('transform-origin');
   }
 
   @Method()
@@ -213,6 +215,7 @@ export class Gallery {
   }
 
   private _rotateImage(image): void {
+    this.galleryImageElement.removeAttribute('transform-origin');
     // setup rotate angle
     if (!this.galleryImage['rotateAngle']) this.galleryImage['rotateAngle'] = 0;
     (this.galleryImage['rotateAngle'] == 270) ? this.galleryImage['rotateAngle'] = 0 : this.galleryImage['rotateAngle'] += 90;
@@ -231,7 +234,7 @@ export class Gallery {
     }
 
     // apply transformation to image element
-    this.galleryImageElement.style.transform = `rotate(${this.galleryImage['rotateAngle']}deg)`;
+    this.galleryImageElement.style.transform = `rotate(${this.galleryImage['rotateAngle'] || 0}deg)`;
 
     // set data
     sessionStorage.setItem('rotatedImages', JSON.stringify(this.rotatedImagesData));
