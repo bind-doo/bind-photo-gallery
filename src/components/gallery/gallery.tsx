@@ -235,7 +235,7 @@ export class Gallery {
 
     // set image width on rotate 
     if (window.innerWidth >= 772) {
-      this.galleryImage['rotateAngle'] != 0 ? this.galleryImageElement.style.width = '40rem' : this.galleryImageElement.style.width = '100%';
+      this.galleryImage['rotateAngle'] != 0 && this.galleryImage['rotateAngle'] != 180 ? this.galleryImageElement.style.width = '40rem' : this.galleryImageElement.style.width = '100%';
     }
 
     // apply transformation to image element
@@ -257,7 +257,6 @@ export class Gallery {
               class='bc-grid-image' src={image.url} alt="" /></div>
           })}
         </div>
-        <div class="clearfix"></div>
       </div>
     }
     ;
