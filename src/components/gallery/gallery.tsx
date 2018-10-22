@@ -233,6 +233,11 @@ export class Gallery {
       this.rotatedImagesData.push(imageData);
     }
 
+    // set image width on rotate 
+    if (window.innerWidth >= 772) {
+      this.galleryImage['rotateAngle'] != 0 ? this.galleryImageElement.style.width = '40rem' : this.galleryImageElement.style.width = '100%';
+    }
+
     // apply transformation to image element
     this.galleryImageElement.style.transform = `rotate(${this.galleryImage['rotateAngle'] || 0}deg)`;
 
