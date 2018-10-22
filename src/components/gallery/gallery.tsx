@@ -141,7 +141,7 @@ export class Gallery {
   public imageLoaded(): void {
     this.galleryImageElement.style.transform = `rotate(${this.galleryImage['rotateAngle'] || 0}deg)`;;
     this.isImageLoading = false;
-    this.imageWrapperStyle = { display: 'initial' };
+    this.imageWrapperStyle = { display: 'grid' };
     this.galleryImageElement.removeAttribute('transform-origin');
   }
 
