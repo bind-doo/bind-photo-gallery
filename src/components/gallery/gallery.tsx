@@ -25,6 +25,7 @@ export class Gallery {
   public imagePreviewHideNav: any = { 'grid-template-columns': '100%' };
   public hideNavStyle: any = { 'display': 'none' };
   public rotatedImagesData: Array<any> = JSON.parse(sessionStorage.getItem('rotatedImages') || "[]") || [];
+  public deviceOrientation: any;
 
   @Listen('window:keydown.escape')
   handleEsc() {
@@ -64,6 +65,7 @@ export class Gallery {
   @State() public touches: number;
 
   componentWillLoad() {
+    window.matchMedia("(orientation: portrait)").matches ? this.deviceOrientation = 'portrait' : this.deviceOrientation = 'landscape';
   }
 
   componentDidLoad() {
@@ -233,8 +235,13 @@ export class Gallery {
       this.rotatedImagesData.push(imageData);
     }
 
-    // set image width on rotate 
-    if (window.innerWidth >= 772) {
+    // set image width on rotate - ONLY DEVICES IN LANDSCAPE MODE 
+    if (window.innerWidth < 1300 && this.deviceOrientation == 'landscape') {
+      this.galleryImage['rotateAngle'] != 0 && this.galleryImage['rotateAngle'] != 180 ? this.galleryImageElement.style.width = '20rem' : this.galleryImageElement.style.width = '100%';
+    }
+
+    // set image width on rotate - ONLY DEVICES IN PORTRAIT MODE 
+    if (window.innerWidth >= 772 && this.deviceOrientation == 'portrait') {
       this.galleryImage['rotateAngle'] != 0 && this.galleryImage['rotateAngle'] != 180 ? this.galleryImageElement.style.width = '40rem' : this.galleryImageElement.style.width = '100%';
     }
 
@@ -265,7 +272,6 @@ export class Gallery {
   private _renderCloseButton(): any {
     if (this.closeButton) {
       return <button class='bc-close-button' onClick={() => this._closeGallery()}></button>
-
     } else {
       return <div></div>
     }
@@ -303,7 +309,6 @@ export class Gallery {
   }
 
   render() {
-
     return (
       <div>
         {this._renderToolbarGrid()}
