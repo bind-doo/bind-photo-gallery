@@ -141,11 +141,7 @@
 
 .bc-image-wrapper, .bc-image-container {
   width: 100%;
-  height: 100%;
-  display: grid;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
+  max-height: 100%;
 }
 
 .bc-gallery-image {

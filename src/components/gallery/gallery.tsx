@@ -92,8 +92,6 @@ export class Gallery {
         this._handleGesture();
         this.touches = 0;
       }
-
-      this.galleryImageElement.style.removeProperty('transform-origin');
     });
 
     pinchit(this.galleryImageContainer);
@@ -144,7 +142,6 @@ export class Gallery {
     this.galleryImageElement.style.transform = `rotate(${this.galleryImage['rotateAngle'] || 0}deg)`;;
     this.isImageLoading = false;
     this.imageWrapperStyle = { display: 'grid' };
-    this.galleryImageElement.removeAttribute('transform-origin');
   }
 
   @Method()
@@ -217,7 +214,10 @@ export class Gallery {
   }
 
   private _rotateImage(image): void {
-    this.galleryImageElement.removeAttribute('transform-origin');
+    // reset transform origin property
+    this.galleryImageElement.style.removeProperty('transform-origin');
+    this.galleryImageElement.style.transformOrigin = '';
+
     // setup rotate angle
     if (!this.galleryImage['rotateAngle']) this.galleryImage['rotateAngle'] = 0;
     (this.galleryImage['rotateAngle'] == 270) ? this.galleryImage['rotateAngle'] = 0 : this.galleryImage['rotateAngle'] += 90;
@@ -237,7 +237,7 @@ export class Gallery {
 
     // set image width on rotate - ONLY DEVICES IN LANDSCAPE MODE 
     if (window.innerWidth < 1300 && this.deviceOrientation == 'landscape') {
-      this.galleryImage['rotateAngle'] != 0 && this.galleryImage['rotateAngle'] != 180 ? this.galleryImageElement.style.width = '20rem' : this.galleryImageElement.style.width = '100%';
+      this.galleryImage['rotateAngle'] != 0 && this.galleryImage['rotateAngle'] != 180 ? this.galleryImageElement.style.width = '18rem' : this.galleryImageElement.style.width = '100%';
     }
 
     // set image width on rotate - ONLY DEVICES IN PORTRAIT MODE 
