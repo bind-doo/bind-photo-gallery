@@ -20,6 +20,8 @@ export class Gallery {
 
   public galleryImageContainer: HTMLElement;
   public galleryImageElement: HTMLElement;
+  public galleryImageWrapper: HTMLElement;
+  public imagePreviewContainer: HTMLElement;
   public gridOverlayElement: HTMLElement;
   public gestureZone = this.galleryImageElement;
   public imagePreviewHideNav: any = { 'grid-template-columns': '100%' };
@@ -59,8 +61,8 @@ export class Gallery {
   @State() public imageIndex: number;
   @State() public isImageLoading: boolean;
   @State() public displayGrid: boolean;
-  @State() public imageWrapperStyle: any = { display: 'none' };
-  @State() public galleryImageStyle: any = {};
+  @State() public imageContainerStyle: any = { display: 'none' };
+  @State() public imageWrapperStyle: any = {};
   @State() public galleryWrapper: any = {};
   @State() public touches: number;
 
@@ -78,13 +80,13 @@ export class Gallery {
       });
     }
 
-    this.galleryImageContainer.addEventListener('touchstart', (event) => {
+    this.imagePreviewContainer.addEventListener('touchstart', (event) => {
       this.touchstartX = event['changedTouches'][0].screenX;
       this.touchstartY = event['changedTouches'][0].screenY;
       this.touches = event['touches'].length;
     });
 
-    this.galleryImageContainer.addEventListener('touchend', (event) => {
+    this.imagePreviewContainer.addEventListener('touchend', (event) => {
       this.touchendX = event['changedTouches'][0].screenX;
       this.touchendY = event['changedTouches'][0].screenY;
 
@@ -94,7 +96,12 @@ export class Gallery {
       }
     });
 
-    pinchit(this.galleryImageContainer);
+    let pinch = pinchit(this.galleryImageContainer);
+
+    pinch.on('touchmove', () => {
+      let mystr = 'isrotateornot(90degmaybeorsomethingevenmoar) ';
+      this.galleryImageElement.style.transform = mystr.concat(this.galleryImageElement.style.transform);
+    })
   }
 
   @Method()
@@ -109,7 +116,7 @@ export class Gallery {
     this.imageIndex = imageIndex;
     this.galleryImage = this.images[imageIndex];
     this.isImageLoading = true;
-    this.imageWrapperStyle = { display: 'none' };
+    this.imageContainerStyle = { display: 'none' };
     this.onImageChange.emit(imageIndex);
   }
 
@@ -139,9 +146,9 @@ export class Gallery {
 
   @Method()
   public imageLoaded(): void {
-    this.galleryImageElement.style.transform = `rotate(${this.galleryImage['rotateAngle'] || 0}deg)`;;
+    this.galleryImageContainer.style.transform = `rotate(${this.galleryImage['rotateAngle'] || 0}deg)`;;
     this.isImageLoading = false;
-    this.imageWrapperStyle = { display: 'grid' };
+    this.imageContainerStyle = { display: 'grid' };
   }
 
   @Method()
@@ -183,41 +190,37 @@ export class Gallery {
 
   private _goNextImageAnimated(): void {
     if (this.images.length > 1) {
-      this.galleryImageStyle = {
+      this.imageWrapperStyle = {
         '-webkit-animation': 'slide-right 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both',
         'animation': 'slide-right 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both'
       };
 
       setTimeout(() => {
         this.nextImage();
-        this._clearGalleryImageStyle();
+        this._clearImageWrapperStyle();
       }, 300);
     }
   }
 
   private _goPreviousImageAnimated(): void {
     if (this.images.length > 1) {
-      this.galleryImageStyle = {
+      this.imageWrapperStyle = {
         '-webkit-animation': 'slide-left 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both',
         'animation': 'slide-left 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both'
       };
 
       setTimeout(() => {
         this.previousImage();
-        this._clearGalleryImageStyle();
+        this._clearImageWrapperStyle();
       }, 300);
     }
   }
 
-  private _clearGalleryImageStyle(): void {
-    this.galleryImageStyle = {};
+  private _clearImageWrapperStyle(): void {
+    this.imageWrapperStyle = {};
   }
 
   private _rotateImage(image): void {
-    // reset transform origin property
-    this.galleryImageElement.style.removeProperty('transform-origin');
-    this.galleryImageElement.style.transformOrigin = '';
-
     // setup rotate angle
     if (!this.galleryImage['rotateAngle']) this.galleryImage['rotateAngle'] = 0;
     (this.galleryImage['rotateAngle'] == 270) ? this.galleryImage['rotateAngle'] = 0 : this.galleryImage['rotateAngle'] += 90;
@@ -235,18 +238,18 @@ export class Gallery {
       this.rotatedImagesData.push(imageData);
     }
 
-    // set image width on rotate - ONLY DEVICES IN LANDSCAPE MODE 
+    // set image width on rotate - ONLY DEVICES IN LANDSCAPE MODE
     if (window.innerWidth < 1300 && this.deviceOrientation == 'landscape') {
       this.galleryImage['rotateAngle'] != 0 && this.galleryImage['rotateAngle'] != 180 ? this.galleryImageElement.style.width = '18rem' : this.galleryImageElement.style.width = '100%';
     }
 
-    // set image width on rotate - ONLY DEVICES IN PORTRAIT MODE 
+    // set image width on rotate - ONLY DEVICES IN PORTRAIT MODE
     if (window.innerWidth >= 772 && this.deviceOrientation == 'portrait') {
       this.galleryImage['rotateAngle'] != 0 && this.galleryImage['rotateAngle'] != 180 ? this.galleryImageElement.style.width = '40rem' : this.galleryImageElement.style.width = '100%';
     }
 
     // apply transformation to image element
-    this.galleryImageElement.style.transform = `rotate(${this.galleryImage['rotateAngle'] || 0}deg)`;
+    this.galleryImageContainer.style.transform = `rotate(${this.galleryImage['rotateAngle'] || 0}deg)`;
 
     // set data
     sessionStorage.setItem('rotatedImages', JSON.stringify(this.rotatedImagesData));
@@ -327,16 +330,16 @@ export class Gallery {
             </div>
           </div>
 
-          <div class='bc-image-preview' style={this.images.length <= 1 ? this.imagePreviewHideNav : ''}>
+          <div class='bc-image-preview' ref={element => this.imagePreviewContainer = element} style={this.images.length <= 1 ? this.imagePreviewHideNav : ''}>
             <div class='bc-navigation' style={this.images.length <= 1 ? this.hideNavStyle : ''} onClick={() => this.previousImage()}>
               <button class='bc-navigation-left-button'></button>
             </div>
 
-            <div class='bc-image-wrapper'>
+            <div class='bc-image-wrapper' ref={element => this.galleryImageWrapper = element} style={this.imageWrapperStyle}>
               {this._displayLoadingSpinner()}
-              <div class='bc-image-container' style={this.imageWrapperStyle}
+              <div class='bc-image-container' style={this.imageContainerStyle}
                 ref={element => this.galleryImageContainer = element}>
-                <img id='bc-gallery-image' class='bc-gallery-image' style={this.galleryImageStyle}
+                <img id='bc-gallery-image' class='bc-gallery-image'
                   ref={element => this.galleryImageElement = element}
                   src={this.galleryImage && this.galleryImage.url ? this.galleryImage.url : null}
                   onLoad={() => this.imageLoaded()}
