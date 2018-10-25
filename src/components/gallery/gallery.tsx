@@ -101,12 +101,7 @@ export class Gallery {
       this._fixImageRotationWidth();
     });
 
-    let pinch = pinchit(this.galleryImageContainer);
-
-    pinch.on('touchmove', () => {
-      let mystr = 'isrotateornot(90degmaybeorsomethingevenmoar) ';
-      this.galleryImageElement.style.transform = mystr.concat(this.galleryImageElement.style.transform);
-    })
+    pinchit(this.galleryImageContainer);
   }
 
   @Method()
@@ -302,7 +297,7 @@ export class Gallery {
   private _renderImagesNumber(): any {
     if (this.images.length >= 2) {
       return <div>
-        <div class='bc-image-number'>{this.imageIndex + 1} / {this.images.length}</div>
+        <span class='bc-image-number'>{this.imageIndex + 1} / {this.images.length}</span>
       </div>
     } else {
       return <div></div>
@@ -335,7 +330,6 @@ export class Gallery {
           <div class='bc-top-toolbar'>
             <div class='bc-top-left'>
               {this._renderGridButton()}
-              {this._renderImagesNumber()}
             </div>
             <div class="bc-top-middle text-center">
               {this._renderRotateButton()}
@@ -367,12 +361,13 @@ export class Gallery {
             </div>
           </div>
 
-          <div>
-            <p class='text-center bc-image-title'>
+          <div class='bc-footer'>
+            <p class='text-center float-left bc-image-title'>
               {this.galleryImage && this.galleryImage.title ? <span>{this.galleryImage.title}</span> : null}
               {this.galleryImage && this.galleryImage.description && this.galleryImage.title ? ' - ' : ''}
               {this.galleryImage && this.galleryImage.description ? <span> {this.galleryImage.description}</span> : null}
             </p>
+            <p class='text-center float-right bc-image-title'>{this._renderImagesNumber()}</p>
           </div>
         </div>
       </div>
