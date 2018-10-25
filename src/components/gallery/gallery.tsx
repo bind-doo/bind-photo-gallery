@@ -101,7 +101,7 @@ export class Gallery {
       this._fixImageRotationWidth();
     });
 
-    pinchit(this.galleryImageContainer);
+    pinchit(this.galleryImageWrapper);
   }
 
   @Method()
