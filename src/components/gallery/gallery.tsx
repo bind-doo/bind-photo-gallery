@@ -312,17 +312,17 @@ export class Gallery {
   private _fixImageRotationWidth() {
     // set rotated image width - ONLY DEVICES IN LANDSCAPE MODE
     if (window.innerWidth <= 1300 && this.deviceOrientation == 'landscape') {
-      this.galleryImage['rotateAngle'] != 0 && this.galleryImage['rotateAngle'] != undefined && this.galleryImage['rotateAngle'] != 180 ? this.galleryImageElement.style.width = '18rem' : this.galleryImageElement.style.width = '100%';
+      this.galleryImage['rotateAngle'] != 0 && this.galleryImage['rotateAngle'] != undefined && this.galleryImage['rotateAngle'] != 180 ? this.galleryImageElement.style.width = '18rem' : this.galleryImageElement.style.width = 'auto';
     }
 
     // set rotated image width - ALL DEVICES WIDTH >= 1300
     if (window.innerWidth >= 1300) {
-      this.galleryImage['rotateAngle'] != 0 && this.galleryImage['rotateAngle'] != undefined && this.galleryImage['rotateAngle'] != 180 ? this.galleryImageElement.style.width = '50rem' : this.galleryImageElement.style.width = '100%';
+      this.galleryImage['rotateAngle'] != 0 && this.galleryImage['rotateAngle'] != undefined && this.galleryImage['rotateAngle'] != 180 ? this.galleryImageElement.style.width = '50rem' : this.galleryImageElement.style.width = 'auto';
     }
 
     // set rotated image width - ONLY DEVICES IN PORTRAIT MODE
     if (window.innerWidth >= 772 && this.deviceOrientation == 'portrait') {
-      this.galleryImage['rotateAngle'] != 0 && this.galleryImage['rotateAngle'] != undefined && this.galleryImage['rotateAngle'] != 180 ? this.galleryImageElement.style.width = '40rem' : this.galleryImageElement.style.width = '100%';
+      this.galleryImage['rotateAngle'] != 0 && this.galleryImage['rotateAngle'] != undefined && this.galleryImage['rotateAngle'] != 180 ? this.galleryImageElement.style.width = '40rem' : this.galleryImageElement.style.width = 'auto';
     }
   }
 
