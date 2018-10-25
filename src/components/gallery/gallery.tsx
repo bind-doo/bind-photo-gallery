@@ -96,6 +96,11 @@ export class Gallery {
       }
     });
 
+    window.addEventListener("orientationchange", (event) => {
+      this.deviceOrientation = event.target['screen'].orientation.type.includes('portrait') ? 'portrait' : 'landscape';
+      this._fixImageRotationWidth();
+    });
+
     let pinch = pinchit(this.galleryImageContainer);
 
     pinch.on('touchmove', () => {
@@ -146,6 +151,7 @@ export class Gallery {
 
   @Method()
   public imageLoaded(): void {
+    this._fixImageRotationWidth();
     this.galleryImageContainer.style.transform = `rotate(${this.galleryImage['rotateAngle'] || 0}deg)`;;
     this.isImageLoading = false;
     this.imageContainerStyle = { display: 'grid' };
@@ -238,19 +244,7 @@ export class Gallery {
       this.rotatedImagesData.push(imageData);
     }
 
-    // set image width on rotate - ONLY DEVICES IN LANDSCAPE MODE
-    if (window.innerWidth <= 1300 && this.deviceOrientation == 'landscape') {
-      this.galleryImage['rotateAngle'] != 0 && this.galleryImage['rotateAngle'] != 180 ? this.galleryImageElement.style.width = '18rem' : this.galleryImageElement.style.width = '100%';
-    }
-
-    if (window.innerWidth >= 1300) {
-      this.galleryImage['rotateAngle'] != 0 && this.galleryImage['rotateAngle'] != 180 ? this.galleryImageElement.style.width = '50rem' : this.galleryImageElement.style.width = '100%';
-    }
-
-    // set image width on rotate - ONLY DEVICES IN PORTRAIT MODE
-    if (window.innerWidth >= 772 && this.deviceOrientation == 'portrait') {
-      this.galleryImage['rotateAngle'] != 0 && this.galleryImage['rotateAngle'] != 180 ? this.galleryImageElement.style.width = '40rem' : this.galleryImageElement.style.width = '100%';
-    }
+    this._fixImageRotationWidth();
 
     // apply transformation to image element
     this.galleryImageContainer.style.transform = `rotate(${this.galleryImage['rotateAngle'] || 0}deg)`;
@@ -312,6 +306,23 @@ export class Gallery {
       </div>
     } else {
       return <div></div>
+    }
+  }
+
+  private _fixImageRotationWidth() {
+    // set rotated image width - ONLY DEVICES IN LANDSCAPE MODE
+    if (window.innerWidth <= 1300 && this.deviceOrientation == 'landscape') {
+      this.galleryImage['rotateAngle'] != 0 && this.galleryImage['rotateAngle'] != undefined && this.galleryImage['rotateAngle'] != 180 ? this.galleryImageElement.style.width = '18rem' : this.galleryImageElement.style.width = '100%';
+    }
+
+    // set rotated image width - ALL DEVICES WIDTH >= 1300
+    if (window.innerWidth >= 1300) {
+      this.galleryImage['rotateAngle'] != 0 && this.galleryImage['rotateAngle'] != undefined && this.galleryImage['rotateAngle'] != 180 ? this.galleryImageElement.style.width = '50rem' : this.galleryImageElement.style.width = '100%';
+    }
+
+    // set rotated image width - ONLY DEVICES IN PORTRAIT MODE
+    if (window.innerWidth >= 772 && this.deviceOrientation == 'portrait') {
+      this.galleryImage['rotateAngle'] != 0 && this.galleryImage['rotateAngle'] != undefined && this.galleryImage['rotateAngle'] != 180 ? this.galleryImageElement.style.width = '40rem' : this.galleryImageElement.style.width = '100%';
     }
   }
 
