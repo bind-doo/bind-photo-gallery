@@ -239,8 +239,12 @@ export class Gallery {
     }
 
     // set image width on rotate - ONLY DEVICES IN LANDSCAPE MODE
-    if (window.innerWidth < 1300 && this.deviceOrientation == 'landscape') {
+    if (window.innerWidth <= 1300 && this.deviceOrientation == 'landscape') {
       this.galleryImage['rotateAngle'] != 0 && this.galleryImage['rotateAngle'] != 180 ? this.galleryImageElement.style.width = '18rem' : this.galleryImageElement.style.width = '100%';
+    }
+
+    if (window.innerWidth >= 1300) {
+      this.galleryImage['rotateAngle'] != 0 && this.galleryImage['rotateAngle'] != 180 ? this.galleryImageElement.style.width = '50rem' : this.galleryImageElement.style.width = '100%';
     }
 
     // set image width on rotate - ONLY DEVICES IN PORTRAIT MODE
