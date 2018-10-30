@@ -16,7 +16,6 @@ export class Gallery {
   public touchendX: number = 0;
   public touchendY: number = 0;
   public touchMoveX: number = 0;
-  public touchDirection: any = '';
 
   public limit: number = Math.tan(45 * 1.5 / 180 * Math.PI);
 
@@ -85,54 +84,58 @@ export class Gallery {
     }
 
     this.imagePreviewContainer.addEventListener('touchstart', (event) => {
-      this.touchstartX = event['changedTouches'][0].screenX;
-      this.touchstartY = event['changedTouches'][0].screenY;
-      this.touches = event['touches'].length;
+      if (!this.galleryImageElement.style.transform.includes('-')) {
+        this.touchstartX = event['changedTouches'][0].screenX;
+        this.touchstartY = event['changedTouches'][0].screenY;
+        this.touches = event['touches'].length;
+      }
     });
 
     this.imagePreviewContainer.addEventListener('touchmove', (event) => {
-      this.touchMoveX = event['changedTouches'][0].screenX;
-      this.touchendX = event['changedTouches'][0].screenX;
-      this.touchendY = event['changedTouches'][0].screenY;
-      let x = this.touchendX - this.touchstartX;
-      let y = this.touchendY - this.touchstartY;
-      let yx = Math.abs(y / x);
-      let total = window.innerWidth;
-      this.movex = this.index * total + (this.touchstartX - this.touchMoveX);
+      if (!this.galleryImageElement.style.transform.includes('-')) {
+        this.touchMoveX = event['changedTouches'][0].screenX;
+        this.touchendX = event['changedTouches'][0].screenX;
+        this.touchendY = event['changedTouches'][0].screenY;
+        let x = this.touchendX - this.touchstartX;
+        let y = this.touchendY - this.touchstartY;
+        let yx = Math.abs(y / x);
+        let total = window.innerWidth;
+        this.movex = this.index * total + (this.touchstartX - this.touchMoveX);
 
-      if (Math.abs(x) > this.treshold || Math.abs(y) > this.treshold) {
-        // IF left or right
-        if (yx <= this.limit) {
-          return (x < 0) ? this.galleryImageWrapper.style.transform = `translate3d(-${this.movex}px, 0, 0)` : this.galleryImageWrapper.style.transform = `translate3d(${Math.abs(this.movex)}px, 0, 0)`;
+        if (Math.abs(x) > this.treshold || Math.abs(y) > this.treshold) {
+          // IF left or right
+          if (yx <= this.limit) {
+            return (x < 0) ? this.galleryImageWrapper.style.transform = `translate3d(-${this.movex}px, 0, 0)` : this.galleryImageWrapper.style.transform = `translate3d(${Math.abs(this.movex)}px, 0, 0)`;
+          }
         }
       }
     });
 
     this.imagePreviewContainer.addEventListener('touchend', (event) => {
-      this.touchendX = event['changedTouches'][0].screenX;
-      this.touchendY = event['changedTouches'][0].screenY;
-      let x = this.touchendX - this.touchstartX;
-      let y = this.touchendY - this.touchstartY;
-      let yx = Math.abs(y / x);
-      let total = window.innerWidth;
-      let percentage = this.touchendX * 100 / total;
-      let percentageCondition;
+      if (!this.galleryImageElement.style.transform.includes('-')) {
+        this.touchendX = event['changedTouches'][0].screenX;
+        this.touchendY = event['changedTouches'][0].screenY;
+        let x = this.touchendX - this.touchstartX;
+        let y = this.touchendY - this.touchstartY;
+        let yx = Math.abs(y / x);
+        let total = window.innerWidth;
+        let percentage = this.touchendX * 100 / total;
+        let percentageCondition;
 
-      if (Math.abs(x) > this.treshold || Math.abs(y) > this.treshold) {
-        // IF left or right
-        if (yx <= this.limit) {
-          (x < 0) ? percentageCondition = percentage <= 50 : percentageCondition = percentage >= 50;
+        if (Math.abs(x) > this.treshold || Math.abs(y) > this.treshold) {
+          // IF left or right
+          if (yx <= this.limit) {
+            (x < 0) ? percentageCondition = percentage <= 50 : percentageCondition = percentage >= 50;
+          }
+        }
+
+        if ((!this.displayGrid && this.touches === 1) && !(this.galleryImageElement.style.transform.includes('-')) && percentageCondition) {
+          this._handleGesture();
+          this.touches = 0;
+        } else {
+          this.galleryImageWrapper.style.removeProperty('transform');
         }
       }
-
-      if ((!this.displayGrid && this.touches === 1) && !(this.galleryImageElement.style.transform.includes('-')) && percentageCondition) {
-        this._handleGesture();
-        this.touches = 0;
-      } else {
-        this.galleryImageWrapper.style.removeProperty('transform');
-      }
-
-      this.touchDirection = '';
     });
 
     window.addEventListener("orientationchange", (event) => {
