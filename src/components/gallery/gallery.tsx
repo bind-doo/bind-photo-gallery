@@ -15,6 +15,7 @@ export class Gallery {
   public touchstartY: number = 0;
   public touchendX: number = 0;
   public touchendY: number = 0;
+  public touchDirection: any = '';
 
   public limit: number = Math.tan(45 * 1.5 / 180 * Math.PI);
 
@@ -65,6 +66,8 @@ export class Gallery {
   @State() public imageWrapperStyle: any = {};
   @State() public galleryWrapper: any = {};
   @State() public touches: number;
+  @State() public imageTranslateLeft: number = 0;
+  @State() public imageTranslateRight: number = 0;
 
   componentWillLoad() {
     window.matchMedia("(orientation: portrait)").matches ? this.deviceOrientation = 'portrait' : this.deviceOrientation = 'landscape';
@@ -81,9 +84,28 @@ export class Gallery {
     }
 
     this.imagePreviewContainer.addEventListener('touchstart', (event) => {
+      this.imageTranslateLeft = 0;
+      this.imageTranslateRight = 0;
       this.touchstartX = event['changedTouches'][0].screenX;
       this.touchstartY = event['changedTouches'][0].screenY;
       this.touches = event['touches'].length;
+    });
+
+    this.imagePreviewContainer.addEventListener('touchmove', (event) => {
+      // let touchMoveValue = event['changedTouches'][0].screenX;
+      this.touchendX = event['changedTouches'][0].screenX;
+      this.touchendY = event['changedTouches'][0].screenY;
+      let x = this.touchendX - this.touchstartX;
+      let y = this.touchendY - this.touchstartY;
+      let yx = Math.abs(y / x);
+
+      if (Math.abs(x) > this.treshold || Math.abs(y) > this.treshold) {
+        // IF left or right
+        if (yx <= this.limit) {
+          (x < 0) ? this.imageTranslateLeft += 10 : this.imageTranslateRight += 10;
+          return (x < 0) ? this.galleryImageWrapper.style.transform = `translateX(-${this.imageTranslateLeft}px)` : this.galleryImageWrapper.style.transform = `translateX(${this.imageTranslateRight}px)`;
+        }
+      }
     });
 
     this.imagePreviewContainer.addEventListener('touchend', (event) => {
@@ -94,6 +116,8 @@ export class Gallery {
         this._handleGesture();
         this.touches = 0;
       }
+
+      this.touchDirection = '';
     });
 
     window.addEventListener("orientationchange", (event) => {
@@ -147,6 +171,9 @@ export class Gallery {
   @Method()
   public imageLoaded(): void {
     this._fixImageRotationWidth();
+    this.imageTranslateLeft = 0;
+    this.imageTranslateRight = 0;
+    this.galleryImageWrapper.style.removeProperty('transform');
     this.galleryImageContainer.style.transform = `rotate(${this.galleryImage['rotateAngle'] || 0}deg)`;;
     this.isImageLoading = false;
     this.imageContainerStyle = { display: 'grid' };
@@ -184,42 +211,42 @@ export class Gallery {
     if (Math.abs(x) > this.treshold || Math.abs(y) > this.treshold) {
       // IF left or right
       if (yx <= this.limit) {
-        return (x < 0) ? this._goNextImageAnimated() : this._goPreviousImageAnimated();
+        return (x < 0) ? this.nextImage() : this.previousImage();
       }
     }
   }
 
-  private _goNextImageAnimated(): void {
-    if (this.images.length > 1) {
-      this.imageWrapperStyle = {
-        '-webkit-animation': 'slide-right 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both',
-        'animation': 'slide-right 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both'
-      };
+  // private _goNextImageAnimated(): void {
+  //   if (this.images.length > 1) {
+  //     this.imageWrapperStyle = {
+  //       '-webkit-animation': 'slide-right 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both',
+  //       'animation': 'slide-right 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both'
+  //     };
 
-      setTimeout(() => {
-        this.nextImage();
-        this._clearImageWrapperStyle();
-      }, 300);
-    }
-  }
+  //     setTimeout(() => {
+  //   this.nextImage();
+  //   this._clearImageWrapperStyle();
+  //     }, 300);
+  //   }
+  // }
 
-  private _goPreviousImageAnimated(): void {
-    if (this.images.length > 1) {
-      this.imageWrapperStyle = {
-        '-webkit-animation': 'slide-left 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both',
-        'animation': 'slide-left 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both'
-      };
+  // private _goPreviousImageAnimated(): void {
+  //   if (this.images.length > 1) {
+  //     this.imageWrapperStyle = {
+  //       '-webkit-animation': 'slide-left 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both',
+  //       'animation': 'slide-left 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both'
+  //     };
 
-      setTimeout(() => {
-        this.previousImage();
-        this._clearImageWrapperStyle();
-      }, 300);
-    }
-  }
+  //     setTimeout(() => {
+  //   this.previousImage();
+  //       this._clearImageWrapperStyle();
+  //     }, 300);
+  //   }
+  // }
 
-  private _clearImageWrapperStyle(): void {
-    this.imageWrapperStyle = {};
-  }
+  // private _clearImageWrapperStyle(): void {
+  //   this.imageWrapperStyle = {};
+  // }
 
   private _rotateImage(image): void {
     // setup rotate angle
