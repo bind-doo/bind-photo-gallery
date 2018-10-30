@@ -106,11 +106,21 @@ export class Gallery {
     this.imagePreviewContainer.addEventListener('touchend', (event) => {
       this.touchendX = event['changedTouches'][0].screenX;
       this.touchendY = event['changedTouches'][0].screenY;
-
+      let x = this.touchendX - this.touchstartX;
+      let y = this.touchendY - this.touchstartY;
+      let yx = Math.abs(y / x);
       let total = window.innerWidth;
       let percentage = this.touchendX * 100 / total;
+      let percentageCondition;
 
-      if ((!this.displayGrid && this.touches === 1) && !(this.galleryImageElement.style.transform.includes('-')) && percentage > 50) {
+      if (Math.abs(x) > this.treshold || Math.abs(y) > this.treshold) {
+        // IF left or right
+        if (yx <= this.limit) {
+          (x < 0) ? percentageCondition = percentage <= 50 : percentageCondition = percentage >= 50;
+        }
+      }
+
+      if ((!this.displayGrid && this.touches === 1) && !(this.galleryImageElement.style.transform.includes('-')) && percentageCondition) {
         this._handleGesture();
         this.touches = 0;
       } else {
