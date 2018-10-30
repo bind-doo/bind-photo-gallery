@@ -66,8 +66,6 @@ export class Gallery {
   @State() public imageWrapperStyle: any = {};
   @State() public galleryWrapper: any = {};
   @State() public touches: number;
-  @State() public imageTranslateLeft: number = 0;
-  @State() public imageTranslateRight: number = 0;
 
   componentWillLoad() {
     window.matchMedia("(orientation: portrait)").matches ? this.deviceOrientation = 'portrait' : this.deviceOrientation = 'landscape';
@@ -84,15 +82,13 @@ export class Gallery {
     }
 
     this.imagePreviewContainer.addEventListener('touchstart', (event) => {
-      this.imageTranslateLeft = 0;
-      this.imageTranslateRight = 0;
       this.touchstartX = event['changedTouches'][0].screenX;
       this.touchstartY = event['changedTouches'][0].screenY;
       this.touches = event['touches'].length;
     });
 
     this.imagePreviewContainer.addEventListener('touchmove', (event) => {
-      // let touchMoveValue = event['changedTouches'][0].screenX;
+      let touchMoveValue = event['changedTouches'][0].screenX;
       this.touchendX = event['changedTouches'][0].screenX;
       this.touchendY = event['changedTouches'][0].screenY;
       let x = this.touchendX - this.touchstartX;
@@ -102,8 +98,7 @@ export class Gallery {
       if (Math.abs(x) > this.treshold || Math.abs(y) > this.treshold) {
         // IF left or right
         if (yx <= this.limit) {
-          (x < 0) ? this.imageTranslateLeft += 10 : this.imageTranslateRight += 10;
-          return (x < 0) ? this.galleryImageWrapper.style.transform = `translateX(-${this.imageTranslateLeft}px)` : this.galleryImageWrapper.style.transform = `translateX(${this.imageTranslateRight}px)`;
+          return (x < 0) ? this.galleryImageWrapper.style.transform = `translateX(-${window.innerWidth - touchMoveValue}px)` : this.galleryImageWrapper.style.transform = `translateX(${touchMoveValue}px)`;
         }
       }
     });
@@ -112,9 +107,14 @@ export class Gallery {
       this.touchendX = event['changedTouches'][0].screenX;
       this.touchendY = event['changedTouches'][0].screenY;
 
-      if ((!this.displayGrid && this.touches === 1) && !(this.galleryImageElement.style.transform.includes('-'))) {
+      let total = window.innerWidth;
+      let percentage = this.touchendX * 100 / total;
+
+      if ((!this.displayGrid && this.touches === 1) && !(this.galleryImageElement.style.transform.includes('-')) && percentage > 50) {
         this._handleGesture();
         this.touches = 0;
+      } else {
+        this.galleryImageWrapper.style.removeProperty('transform');
       }
 
       this.touchDirection = '';
@@ -171,8 +171,6 @@ export class Gallery {
   @Method()
   public imageLoaded(): void {
     this._fixImageRotationWidth();
-    this.imageTranslateLeft = 0;
-    this.imageTranslateRight = 0;
     this.galleryImageWrapper.style.removeProperty('transform');
     this.galleryImageContainer.style.transform = `rotate(${this.galleryImage['rotateAngle'] || 0}deg)`;;
     this.isImageLoading = false;
