@@ -232,38 +232,6 @@ export class Gallery {
     }
   }
 
-  // private _goNextImageAnimated(): void {
-  //   if (this.images.length > 1) {
-  //     this.imageWrapperStyle = {
-  //       '-webkit-animation': 'slide-right 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both',
-  //       'animation': 'slide-right 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both'
-  //     };
-
-  //     setTimeout(() => {
-  //   this.nextImage();
-  //   this._clearImageWrapperStyle();
-  //     }, 300);
-  //   }
-  // }
-
-  // private _goPreviousImageAnimated(): void {
-  //   if (this.images.length > 1) {
-  //     this.imageWrapperStyle = {
-  //       '-webkit-animation': 'slide-left 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both',
-  //       'animation': 'slide-left 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both'
-  //     };
-
-  //     setTimeout(() => {
-  //   this.previousImage();
-  //       this._clearImageWrapperStyle();
-  //     }, 300);
-  //   }
-  // }
-
-  // private _clearImageWrapperStyle(): void {
-  //   this.imageWrapperStyle = {};
-  // }
-
   private _rotateImage(image): void {
     // setup rotate angle
     if (!this.galleryImage['rotateAngle']) this.galleryImage['rotateAngle'] = 0;
