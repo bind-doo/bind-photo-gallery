@@ -308,7 +308,7 @@ export class Gallery {
     if (this.rotateButton) {
       return <div onClick={() => this._rotateImage(this.galleryImage)}>
         <button class='bc-rotate-button'></button>
-        <small class="bc-rotate-text">Rotate image</small>
+        <p class="bc-rotate-text">Rotate image</p>
       </div>
     } else {
       return <div></div>
