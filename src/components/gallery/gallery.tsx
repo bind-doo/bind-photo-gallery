@@ -364,12 +364,12 @@ export class Gallery {
           </div>
 
           <div class='bc-footer'>
-            <p class='text-center float-left bc-image-title'>
+            <p class='text-left float-left bc-image-title'>
               {this.galleryImage && this.galleryImage.title ? <span>{this.galleryImage.title}</span> : null}
               {this.galleryImage && this.galleryImage.description && this.galleryImage.title ? ' - ' : ''}
               {this.galleryImage && this.galleryImage.description ? <span> {this.galleryImage.description}</span> : null}
             </p>
-            <p class='text-center float-right bc-image-title'>{this._renderImagesNumber()}</p>
+            <p class='text-right float-right bc-image-title'>{this._renderImagesNumber()}</p>
           </div>
         </div>
       </div>

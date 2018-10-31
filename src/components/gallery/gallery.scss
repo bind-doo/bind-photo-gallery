@@ -158,6 +158,16 @@
   margin: 0 auto;
 }
 
+.bc-footer {
+  display: grid;
+  grid-template-columns: 80% 20%;
+  align-items: end;
+}
+
+.bc-footer > p {
+  padding-bottom: 0;
+}
+
 @-webkit-keyframes slide-right {
   0% {
     -webkit-transform: translateX(0);
