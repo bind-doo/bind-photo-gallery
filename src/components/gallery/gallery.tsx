@@ -16,7 +16,6 @@ export class Gallery {
   public touchendX: number = 0;
   public touchendY: number = 0;
   public touchMoveX: number = 0;
-
   public limit: number = Math.tan(45 * 1.5 / 180 * Math.PI);
 
   public galleryImageContainer: HTMLElement;
@@ -29,6 +28,7 @@ export class Gallery {
   public hideNavStyle: any = { 'display': 'none' };
   public rotatedImagesData: Array<any> = JSON.parse(sessionStorage.getItem('rotatedImages') || "[]") || [];
   public deviceOrientation: any;
+  public longTouch;
 
   @Listen('window:keydown.escape')
   handleEsc() {
@@ -68,7 +68,6 @@ export class Gallery {
   @State() public touches: number;
   @State() public movex;
   @State() public index: number = 0;
-
   componentWillLoad() {
     window.matchMedia("(orientation: portrait)").matches ? this.deviceOrientation = 'portrait' : this.deviceOrientation = 'landscape';
   }
@@ -85,6 +84,10 @@ export class Gallery {
 
     this.imagePreviewContainer.addEventListener('touchstart', (event) => {
       if (!this.galleryImageElement.style.transform.includes('-')) {
+        this.longTouch = false;
+        setTimeout(() => {
+          this.longTouch = true;
+        }, 250)
         this.touchstartX = event['changedTouches'][0].screenX;
         this.touchstartY = event['changedTouches'][0].screenY;
         this.touches = event['touches'].length;
@@ -117,8 +120,7 @@ export class Gallery {
         this.touchendY = event['changedTouches'][0].screenY;
         let total = window.innerWidth;
         let percentage = Math.abs(this.movex) * 100 / total;
-
-        if ((!this.displayGrid && this.touches === 1) && !(this.galleryImageElement.style.transform.includes('-')) && percentage >= 50) {
+        if ((!this.displayGrid && this.touches === 1) && !(this.galleryImageElement.style.transform.includes('-')) && percentage >= 50 || !this.longTouch) {
           this._handleGesture();
           this.touches = 0;
         } else {
