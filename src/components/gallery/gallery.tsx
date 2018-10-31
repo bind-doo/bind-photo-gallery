@@ -218,9 +218,28 @@ export class Gallery {
     if (Math.abs(x) > this.treshold || Math.abs(y) > this.treshold) {
       // IF left or right
       if (yx <= this.limit) {
-        return (x < 0) ? this.nextImage() : this.previousImage();
+        if (x < 0) {
+          this.nextImage();
+          this.imageWrapperStyle = {
+            '-webkit-animation': 'slide-left 0.2s cubic-bezier(0.250, 0.460, 0.450, 0.940) both',
+            'animation': 'slide-left 0.2s cubic-bezier(0.250, 0.460, 0.450, 0.940) both'
+          };
+        } else {
+          this.previousImage();
+          this.imageWrapperStyle = {
+            '-webkit-animation': 'slide-right 0.2s cubic-bezier(0.250, 0.460, 0.450, 0.940) both',
+            'animation': 'slide-right 0.2s cubic-bezier(0.250, 0.460, 0.450, 0.940) both'
+          };
+        }
+        setTimeout(() => {
+          this._clearimageWrapperStyle();
+        }, 300);
       }
     }
+  }
+
+  private _clearimageWrapperStyle(): void {
+    this.imageWrapperStyle = {};
   }
 
   private _rotateImage(image): void {
