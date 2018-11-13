@@ -224,12 +224,14 @@ export class Gallery {
             '-webkit-animation': 'slide-left 0.2s cubic-bezier(0.250, 0.460, 0.450, 0.940) both',
             'animation': 'slide-left 0.2s cubic-bezier(0.250, 0.460, 0.450, 0.940) both'
           };
+          this.galleryImageWrapper.style.transform = 'none';
         } else {
           this.previousImage();
           this.imageWrapperStyle = {
             '-webkit-animation': 'slide-right 0.2s cubic-bezier(0.250, 0.460, 0.450, 0.940) both',
             'animation': 'slide-right 0.2s cubic-bezier(0.250, 0.460, 0.450, 0.940) both'
           };
+          this.galleryImageWrapper.style.transform = 'none';
         }
         setTimeout(() => {
           this._clearimageWrapperStyle();
