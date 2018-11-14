@@ -1,4 +1,4 @@
-import { Component, State, Event, EventEmitter, Method, Prop } from '@stencil/core';
+import { Component, State, Event, EventEmitter, Method, Prop, Listen } from '@stencil/core';
 import { image } from './interfaces/interfaces';
 import pinchit from 'pinchit/dist/pinchit.js';
 
@@ -20,43 +20,39 @@ export class Gallery {
 
   public galleryImageContainer: HTMLElement;
   public galleryImageElement: HTMLElement;
+  public gridOverlayElement: HTMLElement;
   public gestureZone = this.galleryImageElement;
+  public imagePreviewHideNav: any = { 'grid-template-columns': '100%' };
+  public hideNavStyle: any = { 'display': 'none' };
 
-  public imagePreviewHideNav: any = {
-    'grid-template-columns': '100%'
-  };
-
-  public hideNavStyle: any = {
-    'display': 'none'
-  };
+  @Listen('keydown')
+  handleKeyDown(ev) {
+    if (ev.key == 'Escape' && this.displayGrid) {
+      this.displayGrid = false;
+    }
+  }
 
   @Prop() public images: Array<image> = [];
+  @Prop() public imageStartIndex: number = 0;
   @Prop() public closeButton: boolean = false;
 
   @Event() onGalleryClose: EventEmitter;
   @Event() onImageChange: EventEmitter<number>;
 
-
   @State() public galleryImage: image;
   @State() public imageIndex: number;
   @State() public isImageLoading: boolean;
   @State() public displayGrid: boolean;
-
-  @State() public imageWrapperStyle: any = {
-    display: 'none'
-  };
-
+  @State() public imageWrapperStyle: any = { display: 'none' };
   @State() public galleryImageStyle: any = {};
-
   @State() public galleryWrapper: any = {};
-
   @State() public touches: number;
 
   componentWillLoad() {
   }
 
   componentDidLoad() {
-    this.setImage(0);
+    this.setImage(this.imageStartIndex);
 
     this.galleryImageContainer.addEventListener('touchstart', (event) => {
       this.touchstartX = event['changedTouches'][0].screenX;
@@ -191,15 +187,17 @@ export class Gallery {
 
   private _renderToolbarGrid(): any {
     if (this.displayGrid) {
-      return <div class='bc-gallery-grid-overlay' onClick={() => this.displayGrid = false}>
+      return <div class='bc-gallery-grid-overlay' ref={element => this.gridOverlayElement = element}>
+        <div class="text-right">
+          <button class='bc-close-button' onClick={() => this.displayGrid = false}></button>
+        </div>
         <div class='bc-gallery-grid'>
-          {
-            this.images.map((image, index) => {
+          {this.images.map((image, index) => {
               return <div class='bc-grid-image-container' onClick={() => this.setImage(index)}><img
                 class='bc-grid-image' src={image.url} alt="" /></div>
-            })
-          }
+            })}
         </div>
+        <div class="clearfix"></div>
       </div>
     }
     ;
@@ -207,18 +205,27 @@ export class Gallery {
 
   private _renderCloseButton(): any {
     if (this.closeButton) {
-      return <div class='text-right bc-top-right'>
-        <button class='bc-close-button' onClick={() => this._closeGallery()}></button>
-      </div>
+      return <button class='bc-close-button' onClick={() => this._closeGallery()}></button>
+
     } else {
       return <div></div>
     }
   }
 
   private _renderGridButton(): any {
-    if (this.images.length > 1) {
+    if (this.images.length >= 2) {
       return <div>
         <button class='bc-grid-button' onClick={() => this.openGridGallery()}></button>
+      </div>
+    } else {
+      return <div></div>
+    }
+  }
+
+  private _renderImagesNumber(): any {
+    if (this.images.length >= 2) {
+      return <div>
+        <div class='bc-image-number'>{this.imageIndex + 1} / {this.images.length}</div>
       </div>
     } else {
       return <div></div>
@@ -235,7 +242,9 @@ export class Gallery {
           <div class='bc-top-toolbar'>
             <div class='bc-top-left'>
               {this._renderGridButton()}
-              <div class='bc-image-number'>{this.imageIndex + 1} / {this.images.length}</div>
+              {this._renderImagesNumber()}
+            </div>
+            <div class="bc-top-right text-right">
               {this._renderCloseButton()}
             </div>
           </div>
@@ -245,7 +254,7 @@ export class Gallery {
               <button class='bc-navigation-left-button'></button>
             </div>
 
-            <div>
+            <div class='bc-image-wrapper'>
               {this._displayLoadingSpinner()}
               <div class='bc-image-wrapper' style={this.imageWrapperStyle}
                 ref={element => this.galleryImageContainer = element}>
@@ -254,12 +263,6 @@ export class Gallery {
                   src={this.galleryImage && this.galleryImage.url ? this.galleryImage.url : null}
                   onLoad={() => this.imageLoaded()}
                   alt="image" />
-
-                  <p class='text-center bc-image-title'>
-                    {this.galleryImage && this.galleryImage.title ? <span>{this.galleryImage.title}</span> : null}
-                    {this.galleryImage && this.galleryImage.description && this.galleryImage.title ? ' - ' : ''}
-                    {this.galleryImage && this.galleryImage.description ? <span> {this.galleryImage.description}</span> : null}
-                  </p>
               </div>
             </div>
 
@@ -268,6 +271,13 @@ export class Gallery {
             </div>
           </div>
 
+          <div>
+            <p class='text-center bc-image-title'>
+              {this.galleryImage && this.galleryImage.title ? <span>{this.galleryImage.title}</span> : null}
+              {this.galleryImage && this.galleryImage.description && this.galleryImage.title ? ' - ' : ''}
+              {this.galleryImage && this.galleryImage.description ? <span> {this.galleryImage.description}</span> : null}
+            </p>
+          </div>
         </div>
       </div>
     );
