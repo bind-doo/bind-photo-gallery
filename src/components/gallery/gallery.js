@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-import { Component, State, Event, Method, Prop } from '@stencil/core';
+import { Component, State, Event, Method, Prop, Listen } from '@stencil/core';
 import pinchit from 'pinchit/dist/pinchit.js';
 let Gallery = class Gallery {
     constructor() {
@@ -16,43 +16,70 @@ let Gallery = class Gallery {
         this.touchendY = 0;
         this.limit = Math.tan(45 * 1.5 / 180 * Math.PI);
         this.gestureZone = this.galleryImageElement;
-        this.imagePreviewHideNav = {
-            'grid-template-columns': '100%'
-        };
-        this.hideNavStyle = {
-            'display': 'none'
-        };
+        this.imagePreviewHideNav = { 'grid-template-columns': '100%' };
+        this.hideNavStyle = { 'display': 'none' };
+        this.rotatedImagesData = JSON.parse(sessionStorage.getItem('rotatedImages') || "[]") || [];
         this.images = [];
+        this.imageStartIndex = 0;
         this.closeButton = false;
-        this.imageWrapperStyle = {
-            display: 'none'
-        };
+        this.rotateButton = true;
+        this.imageWrapperStyle = { display: 'none' };
         this.galleryImageStyle = {};
         this.galleryWrapper = {};
     }
+    handleEsc() {
+        if (this.displayGrid) {
+            this.displayGrid = false;
+            return;
+        }
+        this._closeGallery();
+    }
+    handleRight() {
+        if (!this.displayGrid)
+            this.nextImage();
+    }
+    handleLeft() {
+        if (!this.displayGrid)
+            this.previousImage();
+    }
     componentWillLoad() {
+        if ('orientation' in screen) {
+            this.deviceOrientation = window.screen.orientation;
+        }
     }
     componentDidLoad() {
-        this.setImage(0);
+        this.setImage(this.imageStartIndex);
+        if (this.rotatedImagesData.length >= 1) {
+            this.images.forEach((image, index) => {
+                const exists = this.rotatedImagesData.filter(item => item.index == index);
+                if (exists.length) {
+                    image['rotateAngle'] = exists[0].angle;
+                }
+            });
+        }
         this.galleryImageContainer.addEventListener('touchstart', (event) => {
             this.touchstartX = event['changedTouches'][0].screenX;
             this.touchstartY = event['changedTouches'][0].screenY;
             this.touches = event['touches'].length;
         });
         this.galleryImageContainer.addEventListener('touchend', (event) => {
-            let elem = document.getElementById('bc-gallery-image');
             this.touchendX = event['changedTouches'][0].screenX;
             this.touchendY = event['changedTouches'][0].screenY;
-            if ((!this.displayGrid && this.touches === 1) && !(elem['style'].transform.includes('-'))) {
+            if ((!this.displayGrid && this.touches === 1) && !(this.galleryImageElement.style.transform.includes('-'))) {
                 this._handleGesture();
                 this.touches = 0;
             }
+            this.galleryImageElement.style.removeProperty('transform-origin');
         });
         pinchit(this.galleryImageContainer);
     }
     setImage(imageIndex) {
-        if (imageIndex === this.imageIndex)
+        if (imageIndex === this.imageIndex && !this.displayGrid)
             return;
+        if (imageIndex === this.imageIndex && this.displayGrid) {
+            this.displayGrid = false;
+            return;
+        }
         if (this.displayGrid)
             this.displayGrid = false;
         this.imageIndex = imageIndex;
@@ -82,8 +109,11 @@ let Gallery = class Gallery {
         }
     }
     imageLoaded() {
+        this.galleryImageElement.style.transform = `rotate(${this.galleryImage['rotateAngle'] || 0}deg)`;
+        ;
         this.isImageLoading = false;
-        this.imageWrapperStyle = { display: 'initial' };
+        this.imageWrapperStyle = { display: 'grid' };
+        this.galleryImageElement.removeAttribute('transform-origin');
     }
     openGridGallery() {
         this.displayGrid = true;
@@ -142,9 +172,41 @@ let Gallery = class Gallery {
     _clearGalleryImageStyle() {
         this.galleryImageStyle = {};
     }
+    _rotateImage(image) {
+        this.galleryImageElement.removeAttribute('transform-origin');
+        // setup rotate angle
+        if (!this.galleryImage['rotateAngle'])
+            this.galleryImage['rotateAngle'] = 0;
+        (this.galleryImage['rotateAngle'] == 270) ? this.galleryImage['rotateAngle'] = 0 : this.galleryImage['rotateAngle'] += 90;
+        // get current image index and rotateAngle in an object
+        let imageData = { angle: this.galleryImage['rotateAngle'], index: this.images.indexOf(image) };
+        // check if image with that index is already rotated and store the vlaue
+        const exists = this.rotatedImagesData.filter(item => item.index == imageData.index);
+        // if image already is rotated, will change that value, if not will push image to array and add to session storage
+        if (this.rotatedImagesData.length && exists.length) {
+            imageData.angle > 0 ? this.rotatedImagesData[this.rotatedImagesData.indexOf(exists[0])] = imageData : this.rotatedImagesData.splice(this.rotatedImagesData.indexOf(exists[0]), 1);
+        }
+        else {
+            this.rotatedImagesData.push(imageData);
+        }
+        // set image width on rotate - ONLY DEVICES IN LANDSCAPE MODE 
+        if (window.innerWidth < 1300 && this.deviceOrientation.angle != 0) {
+            this.galleryImage['rotateAngle'] != 0 && this.galleryImage['rotateAngle'] != 180 ? this.galleryImageElement.style.width = '20rem' : this.galleryImageElement.style.width = '100%';
+        }
+        // set image width on rotate - ONLY DEVICES IN PORTRAIT MODE 
+        if (window.innerWidth >= 772 && this.deviceOrientation.angle == 0) {
+            this.galleryImage['rotateAngle'] != 0 && this.galleryImage['rotateAngle'] != 180 ? this.galleryImageElement.style.width = '40rem' : this.galleryImageElement.style.width = '100%';
+        }
+        // apply transformation to image element
+        this.galleryImageElement.style.transform = `rotate(${this.galleryImage['rotateAngle'] || 0}deg)`;
+        // set data
+        sessionStorage.setItem('rotatedImages', JSON.stringify(this.rotatedImagesData));
+    }
     _renderToolbarGrid() {
         if (this.displayGrid) {
-            return h("div", { class: 'bc-gallery-grid-overlay', onClick: () => this.displayGrid = false },
+            return h("div", { class: 'bc-gallery-grid-overlay', ref: element => this.gridOverlayElement = element },
+                h("div", { class: "text-right" },
+                    h("button", { class: 'bc-close-button', onClick: () => this.displayGrid = false })),
                 h("div", { class: 'bc-gallery-grid' }, this.images.map((image, index) => {
                     return h("div", { class: 'bc-grid-image-container', onClick: () => this.setImage(index) },
                         h("img", { class: 'bc-grid-image', src: image.url, alt: "" }));
@@ -154,17 +216,38 @@ let Gallery = class Gallery {
     }
     _renderCloseButton() {
         if (this.closeButton) {
-            return h("div", { class: 'text-right bc-top-right' },
-                h("button", { class: 'bc-close-button', onClick: () => this._closeGallery() }));
+            return h("button", { class: 'bc-close-button', onClick: () => this._closeGallery() });
         }
         else {
             return h("div", null);
         }
     }
     _renderGridButton() {
-        if (this.images.length > 1) {
+        if (this.images.length >= 2) {
             return h("div", null,
                 h("button", { class: 'bc-grid-button', onClick: () => this.openGridGallery() }));
+        }
+        else {
+            return h("div", null);
+        }
+    }
+    _renderRotateButton() {
+        if (this.rotateButton) {
+            return h("div", { onClick: () => this._rotateImage(this.galleryImage) },
+                h("button", { class: 'bc-rotate-button' }),
+                h("small", { class: "bc-rotate-text" }, "Rotate image"));
+        }
+        else {
+            return h("div", null);
+        }
+    }
+    _renderImagesNumber() {
+        if (this.images.length >= 2) {
+            return h("div", null,
+                h("div", { class: 'bc-image-number' },
+                    this.imageIndex + 1,
+                    " / ",
+                    this.images.length));
         }
         else {
             return h("div", null);
@@ -177,34 +260,48 @@ let Gallery = class Gallery {
                 h("div", { class: 'bc-top-toolbar' },
                     h("div", { class: 'bc-top-left' },
                         this._renderGridButton(),
-                        h("div", { class: 'bc-image-number' },
-                            this.imageIndex + 1,
-                            " / ",
-                            this.images.length),
-                        this._renderCloseButton())),
+                        this._renderImagesNumber()),
+                    h("div", { class: "bc-top-middle text-center" }, this._renderRotateButton()),
+                    h("div", { class: "bc-top-right text-right" }, this._renderCloseButton())),
                 h("div", { class: 'bc-image-preview', style: this.images.length <= 1 ? this.imagePreviewHideNav : '' },
                     h("div", { class: 'bc-navigation', style: this.images.length <= 1 ? this.hideNavStyle : '', onClick: () => this.previousImage() },
                         h("button", { class: 'bc-navigation-left-button' })),
-                    h("div", null,
+                    h("div", { class: 'bc-image-wrapper' },
                         this._displayLoadingSpinner(),
-                        h("div", { class: 'bc-image-wrapper', style: this.imageWrapperStyle, ref: element => this.galleryImageContainer = element },
-                            h("img", { id: 'bc-gallery-image', class: 'bc-gallery-image', style: this.galleryImageStyle, ref: element => this.galleryImageElement = element, src: this.galleryImage && this.galleryImage.url ? this.galleryImage.url : null, onLoad: () => this.imageLoaded(), alt: "image" }),
-                            h("p", { class: 'text-center bc-image-title' },
-                                this.galleryImage && this.galleryImage.title ? h("span", null, this.galleryImage.title) : null,
-                                this.galleryImage && this.galleryImage.description && this.galleryImage.title ? ' - ' : '',
-                                this.galleryImage && this.galleryImage.description ? h("span", null,
-                                    " ",
-                                    this.galleryImage.description) : null))),
+                        h("div", { class: 'bc-image-container', style: this.imageWrapperStyle, ref: element => this.galleryImageContainer = element },
+                            h("img", { id: 'bc-gallery-image', class: 'bc-gallery-image', style: this.galleryImageStyle, ref: element => this.galleryImageElement = element, src: this.galleryImage && this.galleryImage.url ? this.galleryImage.url : null, onLoad: () => this.imageLoaded(), alt: "image" }))),
                     h("div", { class: 'bc-navigation', style: this.images.length <= 1 ? this.hideNavStyle : '', onClick: () => this.nextImage() },
-                        h("button", { class: 'bc-navigation-right-button' }))))));
+                        h("button", { class: 'bc-navigation-right-button' }))),
+                h("div", null,
+                    h("p", { class: 'text-center bc-image-title' },
+                        this.galleryImage && this.galleryImage.title ? h("span", null, this.galleryImage.title) : null,
+                        this.galleryImage && this.galleryImage.description && this.galleryImage.title ? ' - ' : '',
+                        this.galleryImage && this.galleryImage.description ? h("span", null,
+                            " ",
+                            this.galleryImage.description) : null)))));
     }
 };
+__decorate([
+    Listen('window:keydown.escape')
+], Gallery.prototype, "handleEsc", null);
+__decorate([
+    Listen('window:keydown.right')
+], Gallery.prototype, "handleRight", null);
+__decorate([
+    Listen('window:keydown.left')
+], Gallery.prototype, "handleLeft", null);
 __decorate([
     Prop()
 ], Gallery.prototype, "images", void 0);
 __decorate([
     Prop()
+], Gallery.prototype, "imageStartIndex", void 0);
+__decorate([
+    Prop()
 ], Gallery.prototype, "closeButton", void 0);
+__decorate([
+    Prop()
+], Gallery.prototype, "rotateButton", void 0);
 __decorate([
     Event()
 ], Gallery.prototype, "onGalleryClose", void 0);
