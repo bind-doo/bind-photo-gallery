@@ -15,7 +15,7 @@ export class Gallery {
   public touchstartY: number = 0;
   public touchendX: number = 0;
   public touchendY: number = 0;
-
+  public touchMoveX: number = 0;
   public limit: number = Math.tan(45 * 1.5 / 180 * Math.PI);
 
   public galleryImageContainer: HTMLElement;
@@ -28,6 +28,7 @@ export class Gallery {
   public hideNavStyle: any = { 'display': 'none' };
   public rotatedImagesData: Array<any> = JSON.parse(sessionStorage.getItem('rotatedImages') || "[]") || [];
   public deviceOrientation: any;
+  public longTouch;
 
   @Listen('window:keydown.escape')
   handleEsc() {
@@ -65,7 +66,8 @@ export class Gallery {
   @State() public imageWrapperStyle: any = {};
   @State() public galleryWrapper: any = {};
   @State() public touches: number;
-
+  @State() public movex;
+  @State() public index: number = 0;
   componentWillLoad() {
     window.matchMedia("(orientation: portrait)").matches ? this.deviceOrientation = 'portrait' : this.deviceOrientation = 'landscape';
   }
@@ -81,18 +83,49 @@ export class Gallery {
     }
 
     this.imagePreviewContainer.addEventListener('touchstart', (event) => {
-      this.touchstartX = event['changedTouches'][0].screenX;
-      this.touchstartY = event['changedTouches'][0].screenY;
-      this.touches = event['touches'].length;
+      if (!this.galleryImageElement.style.transform.includes('-')) {
+        this.longTouch = false;
+        setTimeout(() => {
+          this.longTouch = true;
+        }, 250)
+        this.touchstartX = event['changedTouches'][0].screenX;
+        this.touchstartY = event['changedTouches'][0].screenY;
+        this.touches = event['touches'].length;
+      }
+    });
+
+    this.imagePreviewContainer.addEventListener('touchmove', (event) => {
+      if (!this.galleryImageElement.style.transform.includes('-')) {
+        this.touchMoveX = event['changedTouches'][0].screenX;
+        this.touchendX = event['changedTouches'][0].screenX;
+        this.touchendY = event['changedTouches'][0].screenY;
+        let x = this.touchendX - this.touchstartX;
+        let y = this.touchendY - this.touchstartY;
+        let yx = Math.abs(y / x);
+        let total = window.innerWidth;
+        this.movex = this.index * total + (this.touchstartX - this.touchMoveX);
+
+        if (Math.abs(x) > this.treshold || Math.abs(y) > this.treshold) {
+          // IF left or right
+          if (yx <= this.limit) {
+            return (x < 0) ? this.galleryImageWrapper.style.transform = `translate3d(-${this.movex}px, 0, 0)` : this.galleryImageWrapper.style.transform = `translate3d(${Math.abs(this.movex)}px, 0, 0)`;
+          }
+        }
+      }
     });
 
     this.imagePreviewContainer.addEventListener('touchend', (event) => {
-      this.touchendX = event['changedTouches'][0].screenX;
-      this.touchendY = event['changedTouches'][0].screenY;
-
-      if ((!this.displayGrid && this.touches === 1) && !(this.galleryImageElement.style.transform.includes('-'))) {
-        this._handleGesture();
-        this.touches = 0;
+      if (!this.galleryImageElement.style.transform.includes('-')) {
+        this.touchendX = event['changedTouches'][0].screenX;
+        this.touchendY = event['changedTouches'][0].screenY;
+        let total = window.innerWidth;
+        let percentage = Math.abs(this.movex) * 100 / total;
+        if ((!this.displayGrid && this.touches === 1) && !(this.galleryImageElement.style.transform.includes('-')) && percentage >= 50 || !this.longTouch) {
+          this._handleGesture();
+          this.touches = 0;
+        } else {
+          this.galleryImageWrapper.style.removeProperty('transform');
+        }
       }
     });
 
@@ -137,7 +170,7 @@ export class Gallery {
     if (this.images.length > 1) {
 
       if (this.imageIndex !== this.images.length - 1) {
-        this.setImage(this.imageIndex + 1)
+        this.setImage(this.imageIndex + 1);
       } else {
         this.setImage(0);
       }
@@ -147,6 +180,7 @@ export class Gallery {
   @Method()
   public imageLoaded(): void {
     this._fixImageRotationWidth();
+    this.galleryImageWrapper.style.removeProperty('transform');
     this.galleryImageContainer.style.transform = `rotate(${this.galleryImage['rotateAngle'] || 0}deg)`;;
     this.isImageLoading = false;
     this.imageContainerStyle = { display: 'grid' };
@@ -184,40 +218,29 @@ export class Gallery {
     if (Math.abs(x) > this.treshold || Math.abs(y) > this.treshold) {
       // IF left or right
       if (yx <= this.limit) {
-        return (x < 0) ? this._goNextImageAnimated() : this._goPreviousImageAnimated();
+        if (x < 0) {
+          this.nextImage();
+          this.imageWrapperStyle = {
+            '-webkit-animation': 'slide-left 0.2s cubic-bezier(0.250, 0.460, 0.450, 0.940) both',
+            'animation': 'slide-left 0.2s cubic-bezier(0.250, 0.460, 0.450, 0.940) both'
+          };
+          this.galleryImageWrapper.style.transform = 'none';
+        } else {
+          this.previousImage();
+          this.imageWrapperStyle = {
+            '-webkit-animation': 'slide-right 0.2s cubic-bezier(0.250, 0.460, 0.450, 0.940) both',
+            'animation': 'slide-right 0.2s cubic-bezier(0.250, 0.460, 0.450, 0.940) both'
+          };
+          this.galleryImageWrapper.style.transform = 'none';
+        }
+        setTimeout(() => {
+          this._clearimageWrapperStyle();
+        }, 300);
       }
     }
   }
 
-  private _goNextImageAnimated(): void {
-    if (this.images.length > 1) {
-      this.imageWrapperStyle = {
-        '-webkit-animation': 'slide-right 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both',
-        'animation': 'slide-right 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both'
-      };
-
-      setTimeout(() => {
-        this.nextImage();
-        this._clearImageWrapperStyle();
-      }, 300);
-    }
-  }
-
-  private _goPreviousImageAnimated(): void {
-    if (this.images.length > 1) {
-      this.imageWrapperStyle = {
-        '-webkit-animation': 'slide-left 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both',
-        'animation': 'slide-left 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both'
-      };
-
-      setTimeout(() => {
-        this.previousImage();
-        this._clearImageWrapperStyle();
-      }, 300);
-    }
-  }
-
-  private _clearImageWrapperStyle(): void {
+  private _clearimageWrapperStyle(): void {
     this.imageWrapperStyle = {};
   }
 
@@ -287,7 +310,7 @@ export class Gallery {
     if (this.rotateButton) {
       return <div onClick={() => this._rotateImage(this.galleryImage)}>
         <button class='bc-rotate-button'></button>
-        <small class="bc-rotate-text">Rotate image</small>
+        <p class="bc-rotate-text">Rotate image</p>
       </div>
     } else {
       return <div></div>
@@ -362,12 +385,12 @@ export class Gallery {
           </div>
 
           <div class='bc-footer'>
-            <p class='text-center float-left bc-image-title'>
+            <p class='text-left float-left bc-image-title'>
               {this.galleryImage && this.galleryImage.title ? <span>{this.galleryImage.title}</span> : null}
               {this.galleryImage && this.galleryImage.description && this.galleryImage.title ? ' - ' : ''}
               {this.galleryImage && this.galleryImage.description ? <span> {this.galleryImage.description}</span> : null}
             </p>
-            <p class='text-center float-right bc-image-title'>{this._renderImagesNumber()}</p>
+            <p class='text-right float-right bc-image-title'>{this._renderImagesNumber()}</p>
           </div>
         </div>
       </div>
