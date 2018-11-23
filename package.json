@@ -1,6 +1,6 @@
 {
   "name": "bind-gallery",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Photo Gallery Web Component",
   "module": "dist/esm/index.js",
   "main": "dist/index.js",
